@@ -27,11 +27,11 @@ jobs:
         include:
           - name: MacOS Editor
             target: editor
-            lib_name: libgdfastnoise2.macos.editor
+            lib_name: libgdfastnoise2.macos.editor.framework
 
           - name: MacOS Release
             target: template_release
-            lib_name: libgdfastnoise2.macos.template_release
+            lib_name: libgdfastnoise2.macos.template_release.framework
 
     steps:
       # Clone our repo
