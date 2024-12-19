@@ -33,6 +33,7 @@ TODO GDScript code
 ### C#
 
 You can use this class using "variant calls" (using `call` with strings for function names).
+Alternatively, you could try using a [C# binding](https://github.com/Auburn/FastNoise2Bindings) directly.
 
 TODO Low-level dynamic C interface with C# binding
 
@@ -40,6 +41,7 @@ TODO Low-level dynamic C interface with C# binding
 ### Native languages
 
 You can use this class from a C++ module, or another GDExtension, using "variant calls" (using `call` with strings for function names).
+Alternatively, you could try depending on the library directly.
 
 TODO Low-level dynamic C interface
 
@@ -51,4 +53,3 @@ How to build
 - Download GodotCpp, unpack its contents somewhere and specify its path as an environment variable (see `SConscript`) (TODO improve this)
 - Copy FastNoise2 shared library (.so, .dll etc) to `project/addons/zylann.fastnoise2/bin`
 - Run SCons. See GDExtension documentation about possible parameters.
-
