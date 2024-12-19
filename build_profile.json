@@ -2,6 +2,8 @@
     "enabled_classes": [
         "Object",
         "Resource",
-        "Image"
+        "Image",
+
+        "VisualInstance3D"
     ]
 }
