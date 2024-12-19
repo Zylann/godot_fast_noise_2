@@ -86,7 +86,7 @@ jobs:
         env:
           SCONS_CACHE: ${{github.workspace}}/.scons_cache/
         run: |
-          scons platform=linux target=${{matrix.target}} dev_build=no
+          scons platform=linux target=${{matrix.target}} dev_build=no build_profile=build_profile.json
           cd project/addons/zylann.fastnoise2/bin
           ls
 
