@@ -20,6 +20,10 @@ env = SConscript(godot_cpp_path + "/SConstruct")
 env.Append(CPPPATH = ["thirdparty/fastnoise2/include"])
 env.Append(LIBPATH = ["thirdparty/fastnoise2/lib"])
 env.Append(LIBS = ["FastNoise"])
+# Fix problems loading the dynamic library since we put it next to our extension DLL, and not next to the executable
+# (which would be very annoying in the editor, because we don't know where the editor will be and requiring the user to
+# do fix it is not acceptable)
+# env.Append(LINKFLAGS=["-Wl,-rpath," + os.path.abspath("includes/SumLib/lib/")])
 
 # is_editor_build = (env["target"] == "editor")
 
