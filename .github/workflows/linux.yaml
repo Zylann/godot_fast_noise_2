@@ -27,11 +27,11 @@ jobs:
         include:
           - name: Linux Editor
             target: editor
-            lib_name: libgdfastnoise2.windows.editor.x86_64.so
+            lib_name: libgdfastnoise2.linux.editor.x86_64.so
 
           - name: Linux Release
             target: template_release
-            lib_name: libgdfastnoise2.windows.template_release.x86_64.so
+            lib_name: libgdfastnoise2.linux.template_release.x86_64.so
 
     steps:
       # Clone our repo
