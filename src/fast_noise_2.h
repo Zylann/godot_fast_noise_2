@@ -197,15 +197,10 @@ public:
 
 	// TODO Mark these functions as override when Godot allows to inherit Noise
 
-	godot::Ref<godot::Image> FastNoise2::get_image(
-			int p_width,
-			int p_height,
-			bool p_invert,
-			bool p_in_3d_space,
-			bool p_normalize
-	) const;
+	godot::Ref<godot::Image> get_image(int p_width, int p_height, bool p_invert, bool p_in_3d_space, bool p_normalize)
+			const;
 
-	godot::TypedArray<godot::Image> FastNoise2::get_image_3d(
+	godot::TypedArray<godot::Image> get_image_3d(
 			int p_width,
 			int p_height,
 			int p_depth,
@@ -213,7 +208,7 @@ public:
 			bool p_normalize
 	) const;
 
-	godot::Ref<godot::Image> FastNoise2::get_seamless_image(
+	godot::Ref<godot::Image> get_seamless_image(
 			int p_width,
 			int p_height,
 			bool p_invert,
