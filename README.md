@@ -13,9 +13,9 @@ This extension is ported from a former integration present in [godot_voxel](http
 How to install
 ----------------
 
-Copy the plugin to your `addons` folder (as `addons/zylann.fastnoise2/`). You might have to restart the editor.
-
 TODO Provide releases on Github
+
+Download one of the releases, and unpack it under your `addons` folder (as `addons/zylann.fastnoise2/`). You might have to restart the editor.
 
 
 Usage
