@@ -7,9 +7,28 @@ compatibility_minimum = 4.4
 
 windows.debug.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.windows.editor.x86_64.dll"
 windows.release.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.linux.editor.x86_64.so"
+linux.release.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.linux.template_release.x86_64.so"
+macos.debug = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.macos.editor.framework"
+macos.release = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.macos.template_release.framework"
 
 [dependencies]
 
 windows.debug = {
     "res://addons/zylann.fastnoise2/bin/FastNoise.dll": ""
+}
+windows.release = {
+    "res://addons/zylann.fastnoise2/bin/FastNoise.dll": ""
+}
+linux.debug = {
+    "res://addons/zylann.fastnoise2/bin/FastNoise.so": ""
+}
+linux.release = {
+    "res://addons/zylann.fastnoise2/bin/FastNoise.so": ""
+}
+macos.debug = {
+    "res://addons/zylann.fastnoise2/bin/FastNoise.dylib": ""
+}
+macos.release = {
+    "res://addons/zylann.fastnoise2/bin/FastNoise.dylib": ""
 }
