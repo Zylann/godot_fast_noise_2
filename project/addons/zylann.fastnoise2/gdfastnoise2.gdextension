@@ -1,0 +1,14 @@
+[configuration]
+
+entry_symbol = "gdfastnoise2_library_init"
+compatibility_minimum = 4.4
+
+[libraries]
+
+windows.debug.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.windows.editor.dev.x86_64.dll"
+
+[dependencies]
+
+windows.debug = {
+    "res://addons/zylann.fastnoise2/bin/FastNoise.dll": ""
+}
