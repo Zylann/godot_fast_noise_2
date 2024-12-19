@@ -87,7 +87,7 @@ jobs:
         env:
           SCONS_CACHE: /.scons_cache/
         run: |
-          scons platform=linuxbsd target=${{matrix.target}} dev_build=no
+          scons platform=linux target=${{matrix.target}} dev_build=no
           cd project/addons/zylann.fastnoise2/bin
           ls
 
