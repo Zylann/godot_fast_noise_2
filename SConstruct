@@ -17,8 +17,8 @@ godot_cpp_path = os.environ.get("GODOT_CPP_PATH", "D:/PROJETS/INFO/GODOT/Engine/
 env = SConscript(godot_cpp_path + "/SConstruct")
 
 # Dependency on FastNoise2
-env.Append(CPPPATH = ["thirdparty/fastnoise2/include"])
-env.Append(LIBPATH = ["thirdparty/fastnoise2/lib"])
+env.Append(CPPPATH = ["thirdparty/FastNoise/include"])
+env.Append(LIBPATH = ["thirdparty/FastNoise/lib"])
 env.Append(LIBS = ["FastNoise"])
 # Fix problems loading the dynamic library since we put it next to our extension DLL, and not next to the executable
 # (which would be very annoying in the editor, because we don't know where the editor will be and requiring the user to
