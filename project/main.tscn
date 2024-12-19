@@ -4,3 +4,7 @@
 
 [node name="Node" type="Node"]
 script = ExtResource("1_ig7tw")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
