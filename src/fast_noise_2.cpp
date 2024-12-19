@@ -420,44 +420,6 @@ void FastNoise2::get_noise_2d_grid_tileable(godot::Vector2i size, Span<float> ds
 	_generator->GenTileable2D(dst.data(), size.x, size.y, 1.f, _seed);
 }
 
-void FastNoise2::generate_image(godot::Ref<godot::Image> image, bool tileable) const {
-	ERR_FAIL_COND(!is_valid());
-	ERR_FAIL_COND(image.is_null());
-
-	const godot::Vector2i image_size = image->get_size();
-
-	godot::PackedByteArray buffer;
-	buffer.resize(image_size.x * image_size.y * sizeof(float));
-
-	Span<uint8_t> buffer_s(buffer.ptrw(), buffer.size());
-	Span<float> buffer_f32 = buffer_s.reinterpret_cast_to<float>();
-
-	if (tileable) {
-		get_noise_2d_grid_tileable(image_size, buffer_f32);
-	} else {
-		get_noise_2d_grid(godot::Vector2(), image_size, buffer_f32);
-	}
-
-	const godot::Image::Format format = image->get_format();
-	if (image->get_format() == godot::Image::FORMAT_RF) {
-		image->set_data(image_size.x, image_size.y, false, format, buffer);
-	} else {
-		// Slow generic path
-		unsigned int i = 0;
-		for (int y = 0; y < image->get_height(); ++y) {
-			for (int x = 0; x < image->get_width(); ++x) {
-#ifdef DEBUG_ENABLED
-				CRASH_COND(i >= buffer.size());
-#endif
-				// Assuming -1..1 output. Some noise types can have different range though.
-				const float n = buffer[i] * 0.5f + 0.5f;
-				++i;
-				image->set_pixel(x, y, godot::Color(n, n, n));
-			}
-		}
-	}
-}
-
 void FastNoise2::update_generator() {
 	if (_noise_type == TYPE_ENCODED_NODE_TREE) {
 		godot::CharString cs = _last_set_encoded_node_tree.utf8();
@@ -804,8 +766,17 @@ void FastNoise2::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_noise_2d_single", "pos"), &Self::get_noise_2d_single);
 	ClassDB::bind_method(D_METHOD("get_noise_3d_single", "pos"), &Self::get_noise_3d_single);
 
-	// TODO Rename `get_image_3d_simd`, or have Godot expose get_image* functions as virtual
-	ClassDB::bind_method(D_METHOD("generate_image", "image", "tileable"), &Self::generate_image);
+	ClassDB::bind_method(
+			D_METHOD("get_image", "width", "height", "invert", "in_3d_space", "normalize"), &Self::get_image
+	);
+	ClassDB::bind_method(
+			D_METHOD("get_image_3d", "width", "height", "depth", "invert", "normalize"), &Self::get_image_3d
+	);
+
+	ClassDB::bind_method(
+			D_METHOD("get_seamless_image", "width", "height", "invert", "in_3d_space", "blend_skirt", "normalize"),
+			&Self::get_seamless_image
+	);
 
 	ClassDB::bind_method(D_METHOD("get_simd_level_name", "level"), &Self::_b_get_simd_level_name);
 

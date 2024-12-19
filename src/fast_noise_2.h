@@ -193,7 +193,6 @@ public:
 
 	void get_noise_2d_grid_tileable(godot::Vector2i size, Span<float> dst) const;
 
-	void generate_image(godot::Ref<godot::Image> image, bool tileable) const;
 
 	// TODO Mark these functions as override when Godot allows to inherit Noise
 
