@@ -1,0 +1,102 @@
+name: 🚪 Windows Builds
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Global Cache Settings
+# SCONS_CACHE for windows must be set in the build environment
+env:
+  # GDExtension is still experimental, so we target latest instead of a "stable" Godot version.
+  GODOT_BASE_BRANCH: "master"
+  SCONS_CACHE_MSVC_CONFIG: true
+  SCONS_CACHE_LIMIT: 4096
+  GODOT_CPP_PATH: thirdparty/godot-cpp
+
+jobs:
+  build:
+    # Windows 10 with latest image
+    name: ${{matrix.name}}
+
+    strategy:
+      matrix:
+        include:
+          - name: Linux Editor
+            target: editor
+            lib_name: libgdfastnoise2.windows.editor.x86_64.so
+
+          - name: Linux Release
+            target: template_release
+            lib_name: libgdfastnoise2.windows.template_release.x86_64.so
+
+    runs-on: ${{ matrix.runner_os }}
+
+    steps:
+      # Clone our repo
+      - uses: actions/checkout@v4
+
+      # Clone GodotCpp
+      - uses: actions/checkout@v4
+        with:
+          repository: godotengine/godot-cpp
+          ref: master
+          path: ${{env.GODOT_CPP_PATH}}
+      
+      - name: "Get FastNoise2"
+        run: |
+          curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Linux64-GCC.zip
+          unzip FastNoise2-v0.10.0-alpha-Linux64-GCC.zip -d thirdparty
+      
+      # Upload cache on completion and check it out now
+      # Editing this is pretty dangerous for Windows since it can break and needs to be properly tested with a fresh cache.
+      - name: Load .scons_cache directory
+        id: linux-cache
+        #uses: ${{matrix.cache_action}}
+        uses: actions/cache@v4
+        with:
+          path: /.scons_cache/
+          key: ${{github.job}}-${{matrix.target}}-${{env.GODOT_BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+          restore-keys: |
+            ${{github.job}}-${{matrix.target}}-${{env.GODOT_BASE_BRANCH}}-${{github.ref}}-${{github.sha}}
+            ${{github.job}}-${{matrix.target}}-${{env.GODOT_BASE_BRANCH}}-${{github.ref}}
+            ${{github.job}}-${{matrix.target}}-${{env.GODOT_BASE_BRANCH}}
+
+      # Use python 3.x release (works cross platform; best to keep self contained in it's own step)
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v5
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '3.x'
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: 'x64'
+
+      # Setup scons, print python version and scons version info, so if anything is broken it won't run the build.
+      - name: Configuring Python packages
+        run: |
+          python -c "import sys; print(sys.version)"
+          python -m pip install scons
+          python --version
+          scons --version
+
+      # We should always be explicit with our flags usage here since it's gonna be sure to always set those flags.
+      # Note: if we need to use `custom_api_file`, remember the path should be relative to where godot-cpp is
+      - name: Compilation
+        env:
+          SCONS_CACHE: /.scons_cache/
+        run: |
+          scons platform=linuxbsd target=${{matrix.target}} dev_build=no
+          cd project/addons/zylann.fastnoise2/bin
+          ls
+
+      # Make build available
+      - uses: actions/upload-artifact@v4
+        #if: ${{ matrix.target == 'Editor' }}
+        with:
+          name: ${{matrix.lib_name}}
+          path: project/addons/zylann.fastnoise2/bin/${{matrix.lib_name}}
+
