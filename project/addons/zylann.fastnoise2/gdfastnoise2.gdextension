@@ -5,7 +5,8 @@ compatibility_minimum = 4.4
 
 [libraries]
 
-windows.debug.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.windows.editor.dev.x86_64.dll"
+windows.debug.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.windows.editor.x86_64.dll"
+windows.release.x86_64 = "res://addons/zylann.fastnoise2/bin/libgdfastnoise2.windows.template_release.x86_64.dll"
 
 [dependencies]
 
