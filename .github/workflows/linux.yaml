@@ -20,8 +20,8 @@ env:
 
 jobs:
   build:
-    # Windows 10 with latest image
     name: ${{matrix.name}}
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
@@ -33,8 +33,6 @@ jobs:
           - name: Linux Release
             target: template_release
             lib_name: libgdfastnoise2.windows.template_release.x86_64.so
-
-    runs-on: ${{ matrix.runner_os }}
 
     steps:
       # Clone our repo
