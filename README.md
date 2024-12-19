@@ -5,7 +5,7 @@ WARNING: Work-in-progress.
 
 This is a GDExtension bringing [FastNoise2](https://github.com/Auburn/FastNoise2) to Godot Engine. FastNoise2 provides SIMD-accelerated noise generation, which is significantly faster and more configurable than [FastNoiseLite](https://github.com/Auburn/FastNoiseLite).
 
-Version of FastNoise2 used in this extension: 0.10.0-alpha
+Version of FastNoise2 used in this extension: `0.10.0-alpha`
 
 This extension is ported from a former integration present in [godot_voxel](https://github.com/Zylann/godot_voxel).
 
