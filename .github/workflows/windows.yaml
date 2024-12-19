@@ -49,7 +49,7 @@ jobs:
       - name: "Get FastNoise2"
         run: |
           curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip
-          7z e FastNoise2-v0.10.0-alpha-Win64-MSVC.zip -othirdparty
+          7z x FastNoise2-v0.10.0-alpha-Win64-MSVC.zip -othirdparty
           dir
           cd thirdparty
           dir
