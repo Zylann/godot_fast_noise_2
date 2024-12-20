@@ -8,7 +8,11 @@ on:
 
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Not using `${{ github.workflow }}` because when called from another workflow, it takes the value of the caller,
+  # which leads to unexpected cancellation.
+  # See https://github.com/orgs/community/discussions/30708
+  # group: ${{ github.workflow }}-${{ github.ref }}
+  group: linux-${{ github.ref }}
   cancel-in-progress: true
 
 # Global Cache Settings
