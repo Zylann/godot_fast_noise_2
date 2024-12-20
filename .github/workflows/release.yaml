@@ -29,10 +29,29 @@ jobs:
           pattern: libgdfastnoise2.*
           path: project/addons/zylann.fastnoise2/bin
 
-      - name: "Check bin contents"
+      # download-artifact does not just download the file we want:
+      # it also creates a folder of the same name, and then puts the contents in it.
+      # So we have to fix that...
+      # See https://github.com/actions/download-artifact/issues/141
+      - name: "Fix downloaded artifacts"
         run: |
           cd project/addons/zylann.fastnoise2/bin
-          ls
+
+          mv libgdfastnoise2.linux.editor.x86_64.so temp
+          mv temp/libgdfastnoise2.linux.editor.x86_64.so libgdfastnoise2.linux.editor.x86_64.so
+          rm temp
+
+          mv libgdfastnoise2.linux.template_release.x86_64.so temp
+          mv temp/libgdfastnoise2.linux.template_release.x86_64.so libgdfastnoise2.linux.template_release.x86_64.so
+          rm temp
+
+          mv libgdfastnoise2.windows.editor.x86_64.dll temp
+          mv temp/libgdfastnoise2.windows.editor.x86_64.dll libgdfastnoise2.windows.editor.x86_64.dll
+          rm temp
+
+          mv libgdfastnoise2.windows.template_release.x86_64.dll temp
+          mv temp/libgdfastnoise2.windows.template_release.x86_64.dll libgdfastnoise2.windows.template_release.x86_64.dll
+          rm temp
 
       # Get FastNoise2
       - name: "Get FastNoise2 for Linux"
@@ -47,6 +66,11 @@ jobs:
           unzip FastNoise2-v0.10.0-alpha-Win64-MSVC.zip -d FastNoise2_windows
           cp FastNoise2_windows/FastNoise2/bin/FastNoise.dll project/addons/zylann.fastnoise2/bin
 
+      # Copy license
+      - name: "Copy license"
+        run: |
+          cp LICENSE.md project/addons/zylann.fastnoise2
+
       # Remove unwanted files because upload-artifacts cannot filter files that go in the archive.
       # The goal is to get an archive that can be decompressed at the root of a Godot project, 
       # and have only necessary files go in matching directories. This is how the asset library works (otherwise the
@@ -56,7 +80,7 @@ jobs:
         run: |
           cd project
           find -maxdepth 1 -type f -delete
-          ls
+          ls -l
 
       # Make package
       - uses: actions/upload-artifact@v4
