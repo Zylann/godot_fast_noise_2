@@ -48,13 +48,13 @@ jobs:
         run: |
           curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Linux64-GCC.zip
           unzip FastNoise2-v0.10.0-alpha-Linux64-GCC.zip -d FastNoise2_linux
-          cp FastNoise2_linux/FastNoise/lib/FastNoise.so project/addons/zylann.fastoise2/bin
+          cp FastNoise2_linux/FastNoise2/lib/FastNoise.so project/addons/zylann.fastoise2/bin
 
       - name: "Get FastNoise2 for Windows"
         run: |
           curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip
           unzip FastNoise2-v0.10.0-alpha-Win64-MSVC.zip -d FastNoise2_windows
-          cp FastNoise2_windows/FastNoise/bin/FastNoise.dll project/addons/zylann.fastoise2/bin
+          cp FastNoise2_windows/FastNoise2/bin/FastNoise.dll project/addons/zylann.fastoise2/bin
 
       # Remove unwanted files because upload-artifacts cannot filter files that go in the archive.
       # The goal is to get an archive that can be decompressed at the root of a Godot project, 
