@@ -639,9 +639,9 @@ godot::TypedArray<godot::Image> FastNoise2::get_image_3d_with_options_internal(
 		const godot::Vector3i p_size,
 		const ImageOptions p_options
 ) const {
-	ERR_FAIL_COND_V(p_size.x < 0, godot::Ref<godot::Image>());
-	ERR_FAIL_COND_V(p_size.y < 0, godot::Ref<godot::Image>());
-	ERR_FAIL_COND_V(p_size.z < 0, godot::Ref<godot::Image>());
+	ERR_FAIL_COND_V(p_size.x < 0, godot::TypedArray<godot::Image>());
+	ERR_FAIL_COND_V(p_size.y < 0, godot::TypedArray<godot::Image>());
+	ERR_FAIL_COND_V(p_size.z < 0, godot::TypedArray<godot::Image>());
 
 	godot::PackedByteArray buffer_f32_as_u8_pba;
 	buffer_f32_as_u8_pba.resize(p_size.x * p_size.y * p_size.z * sizeof(float));
@@ -652,7 +652,7 @@ godot::TypedArray<godot::Image> FastNoise2::get_image_3d_with_options_internal(
 
 	if (p_options.seamless) {
 		ERR_PRINT("3D seamless noise is not supported");
-		return godot::Ref<godot::Image>();
+		return godot::TypedArray<godot::Image>();
 	} else {
 		range = get_noise_3d_grid(godot::Vector3(), p_size, buffer_f32);
 	}
