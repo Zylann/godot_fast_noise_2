@@ -21,7 +21,7 @@ Download one of the releases, and unpack it under your `addons` folder (as `addo
 Usage
 -------
 
-A new class `FastNoise2` is available. It has similar settings to `FastNoiseLite` to get started quickly. `FastNoise2` also comes with a graph tool to combine more complex noises together. Such graphs can be imported using the `encoded_node_tree` property. Note: make sure to use the graph tool from the same version of FastNoise2 that this extension supports.
+A new class `FastNoise2` is available. It has similar settings to `FastNoiseLite` to get started quickly. The release package of `FastNoise2` also comes with a [graph tool](https://github.com/Auburn/FastNoise2/releases) to combine more complex noises together. Such graphs can be imported using the `encoded_node_tree` property. Note: make sure to use the graph tool from the same version of FastNoise2 that this extension supports.
 
 Note: unlike `FastNoiseLite`, you need to manually update the noise after changing properties. This is because changing properties requires to update internal state, it is a bit more expensive and updating on every change would cause a lot of overhead when loading the resource. Thread-safety could be affected too if noise is generating in a thread while settings are changed. TODO Find a workaround to improve UX.
 
