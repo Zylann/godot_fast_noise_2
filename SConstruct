@@ -33,6 +33,10 @@ sources += [
     "src/fast_noise_2.cpp"
 ]
 
+if env["target"] in ["editor", "template_debug"]:
+    doc_data = env.GodotCPPDocData("src/gen/doc_data.gen.cpp", source = Glob("doc_classes/*.xml"))
+    sources.append(doc_data)
+
 if env["platform"] == "macos":
     library = env.SharedLibrary(
         "{}/{}.{}.{}.framework/{}.{}.{}".format(

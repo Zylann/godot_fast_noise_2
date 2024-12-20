@@ -15,5 +15,6 @@
 *.ilk
 *.zip
 *.exe
+*.gen.cpp
 .vscode/
 
