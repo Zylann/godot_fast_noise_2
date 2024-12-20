@@ -18,6 +18,7 @@ Plugin packages are available in [Releases](https://github.com/Zylann/godot_fast
 Download one of the releases, and unpack it into your project. The archive contains an `addons` folder, to match the convention where plugins are stored in Godot projects. After unpacking, you should have the plugin under `addons/zylann.fastnoise2/`. You might have to restart the editor.
 
 TODO Figure out what to do for Linux ARM64, the release of FastNoise2 only contains x86. 
+
 TODO Figure out what to do for MacOS, we try to compile the extension as universal, but the release of FastNoise2 only has one .dylib for x86 (I am unable to test this, I have no Mac)
 
 
