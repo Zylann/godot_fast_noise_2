@@ -4,6 +4,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_call:
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,6 +20,25 @@ env:
   GODOT_CPP_PATH: thirdparty/godot-cpp
 
 jobs:
+  # TODO Build ourselves on ARM?
+  # This is incomplete, and likely not correct. It would be so much nicer if there was a build available, or a simple command...
+  # build-fn2-linux-arm64:
+  #   # Because the prebuilt release doesn't have it
+  #   name: Build FastNoise2 for Linux ARM64
+  #   runs-on: ubuntu-20.04
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         repository: Auburn/FastNoise2
+  #         ref: master
+      
+  #     - name: "Configure"
+  #       run: cmake -S . -B ./release -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX="./install/FastNoise2" -DFASTNOISE2_NOISETOOL=OFF -DFASTNOISE2_TESTS=OFF -A arm64
+      
+  #     - name: "Build"
+  #       run: cmake --build ./release --config Release --target install --parallel 4
+
   build:
     name: ${{matrix.name}}
     runs-on: ubuntu-20.04

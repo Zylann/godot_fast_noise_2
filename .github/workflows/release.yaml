@@ -1,0 +1,74 @@
+
+# Generates a release package of the plugin.
+# I feel like there are better ways to do this. This is my first time doing that.
+
+name: Make release package
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build_linux:
+    uses: Zylann/godot_fast_noise_2/.github/workflows/linux.yaml@main
+
+  build_windows:
+    uses: Zylann/godot_fast_noise_2/.github/workflows/windows.yaml@main
+
+  dist:
+    runs-on: ubuntu-20.04
+    needs: [build_linux, build_windows]
+
+    steps:
+      # Clone our repo
+      - uses: actions/checkout@v4
+
+      # Get builds
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: libgdfastnoise2.windows.editor.x86_64.dll
+          path: project/addons/zylann.fastnoise2/bin
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: libgdfastnoise2.windows.template_release.x86_64.dll
+          path: project/addons/zylann.fastnoise2/bin
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: libgdfastnoise2.linux.editor.x86_64.so
+          path: project/addons/zylann.fastnoise2/bin
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: libgdfastnoise2.linux.template_release.x86_64.so 
+          path: project/addons/zylann.fastnoise2/bin
+
+      # Get FastNoise2
+      - name: "Get FastNoise2 for Linux"
+        run: |
+          curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Linux64-GCC.zip
+          unzip FastNoise2-v0.10.0-alpha-Linux64-GCC.zip -d FastNoise2_linux
+          cp FastNoise2_linux/FastNoise/bin/FastNoise.so project/addons/zylann.fastoise2/bin
+
+      - name: "Get FastNoise2 for Windows"
+        run: |
+          curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Win64-MSVC.zip
+          unzip FastNoise2-v0.10.0-alpha-Win64-MSVC.zip -d FastNoise2_windows
+          cp FastNoise2_windows/FastNoise/bin/FastNoise.dll project/addons/zylann.fastoise2/bin
+
+      # Remove unwanted files because upload-artifacts cannot filter files that go in the archive.
+      # The goal is to get an archive that can be decompressed at the root of a Godot project, 
+      # and have only necessary files go in matching directories. This is how the asset library works (otherwise the
+      # user has to remember to manually choose the right path to the addons/ folder)
+      - name: "Filter files"
+        # Delete all files in `project/` except the `addons` folder
+        run: |
+          cd project
+          find -maxdepth 1 -type f -delete
+          ls
+
+      # Make package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GDFastNoise2
+          path: project
