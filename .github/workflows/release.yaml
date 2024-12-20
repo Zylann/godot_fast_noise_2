@@ -39,19 +39,19 @@ jobs:
 
           mv libgdfastnoise2.linux.editor.x86_64.so temp
           mv temp/libgdfastnoise2.linux.editor.x86_64.so libgdfastnoise2.linux.editor.x86_64.so
-          rm temp
+          rm -d temp
 
           mv libgdfastnoise2.linux.template_release.x86_64.so temp
           mv temp/libgdfastnoise2.linux.template_release.x86_64.so libgdfastnoise2.linux.template_release.x86_64.so
-          rm temp
+          rm -d temp
 
           mv libgdfastnoise2.windows.editor.x86_64.dll temp
           mv temp/libgdfastnoise2.windows.editor.x86_64.dll libgdfastnoise2.windows.editor.x86_64.dll
-          rm temp
+          rm -d temp
 
           mv libgdfastnoise2.windows.template_release.x86_64.dll temp
           mv temp/libgdfastnoise2.windows.template_release.x86_64.dll libgdfastnoise2.windows.template_release.x86_64.dll
-          rm temp
+          rm -d temp
 
       # Get FastNoise2
       - name: "Get FastNoise2 for Linux"
