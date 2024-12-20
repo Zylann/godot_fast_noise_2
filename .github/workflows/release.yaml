@@ -23,24 +23,10 @@ jobs:
       - uses: actions/checkout@v4
 
       # Get builds
+      # Downloads all artifacts
       - uses: actions/download-artifact@v4
         with:
-          pattern: libgdfastnoise2.windows.editor.x86_64.dll
-          path: project/addons/zylann.fastnoise2/bin
-
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: libgdfastnoise2.windows.template_release.x86_64.dll
-          path: project/addons/zylann.fastnoise2/bin
-
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: libgdfastnoise2.linux.editor.x86_64.so
-          path: project/addons/zylann.fastnoise2/bin
-
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: libgdfastnoise2.linux.template_release.x86_64.so 
+          pattern: libgdfastnoise2.*
           path: project/addons/zylann.fastnoise2/bin
 
       - name: "Check bin contents"
