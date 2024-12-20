@@ -2,8 +2,10 @@
 #define ZN_FAST_NOISE_2_H
 
 // #include <godot_cpp/classes/noise.hpp>
+#include "interval.h"
 #include "span.h"
 #include <FastNoise/FastNoise.h>
+#include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/classes/resource.hpp>
 #include <godot_cpp/variant/typed_array.hpp>
 
@@ -188,13 +190,28 @@ public:
 	void get_noise_3d_series(Span<const float> src_x, Span<const float> src_y, Span<const float> src_z, Span<float> dst)
 			const;
 
-	void get_noise_2d_grid(godot::Vector2 origin, godot::Vector2i size, Span<float> dst) const;
-	void get_noise_3d_grid(godot::Vector3 origin, godot::Vector3i size, Span<float> dst) const;
+	Interval get_noise_2d_grid(godot::Vector2 origin, godot::Vector2i size, Span<float> dst) const;
+	Interval get_noise_3d_grid(godot::Vector3 origin, godot::Vector3i size, Span<float> dst) const;
 
-	void get_noise_2d_grid_tileable(godot::Vector2i size, Span<float> dst) const;
-
+	Interval get_noise_2d_grid_tileable(godot::Vector2i size, Span<float> dst) const;
 
 	// TODO Mark these functions as override when Godot allows to inherit Noise
+
+	struct ImageOptions {
+		bool invert = false;
+		bool in_3d_space = false;
+		bool normalize = false;
+		bool seamless = false;
+		godot::Image::Format format = godot::Image::FORMAT_L8;
+	};
+
+	godot::Ref<godot::Image> get_image_with_options_internal(const godot::Vector2i p_size, const ImageOptions p_options)
+			const;
+
+	godot::TypedArray<godot::Image> get_image_3d_with_options_internal(
+			const godot::Vector3i p_size,
+			const ImageOptions p_options
+	) const;
 
 	godot::Ref<godot::Image> get_image(int p_width, int p_height, bool p_invert, bool p_in_3d_space, bool p_normalize)
 			const;

@@ -1,5 +1,4 @@
 #include "fast_noise_2.h"
-#include <godot_cpp/classes/image.hpp>
 #include <godot_cpp/variant/variant.hpp>
 
 namespace zylann {
@@ -397,27 +396,32 @@ void FastNoise2::get_noise_3d_series(
 	}
 }
 
-void FastNoise2::get_noise_2d_grid(godot::Vector2 origin, godot::Vector2i size, Span<float> dst) const {
-	ERR_FAIL_COND(!is_valid());
-	ERR_FAIL_COND(size.x < 0 || size.y < 0);
-	ERR_FAIL_COND(dst.size() != size_t(size.x) * size_t(size.y));
-	_generator->GenUniformGrid2D(dst.data(), origin.x, origin.y, size.x, size.y, 1.f, _seed);
+Interval FastNoise2::get_noise_2d_grid(godot::Vector2 origin, godot::Vector2i size, Span<float> dst) const {
+	ERR_FAIL_COND_V(!is_valid(), Interval());
+	ERR_FAIL_COND_V(size.x < 0 || size.y < 0, Interval());
+	ERR_FAIL_COND_V(dst.size() != size_t(size.x) * size_t(size.y), Interval());
+	const FastNoise::OutputMinMax range =
+			_generator->GenUniformGrid2D(dst.data(), origin.x, origin.y, size.x, size.y, 1.f, _seed);
+	return Interval{ range.min, range.max };
 }
 
-void FastNoise2::get_noise_3d_grid(godot::Vector3 origin, godot::Vector3i size, Span<float> dst) const {
-	ERR_FAIL_COND(!is_valid());
-	ERR_FAIL_COND(size.x <= 0);
-	ERR_FAIL_COND(size.y <= 0);
-	ERR_FAIL_COND(size.z <= 0);
-	ERR_FAIL_COND(dst.size() != size_t(size.x) * size_t(size.y) * size_t(size.z));
-	_generator->GenUniformGrid3D(dst.data(), origin.x, origin.y, origin.z, size.x, size.y, size.z, 1.f, _seed);
+Interval FastNoise2::get_noise_3d_grid(godot::Vector3 origin, godot::Vector3i size, Span<float> dst) const {
+	ERR_FAIL_COND_V(!is_valid(), Interval());
+	ERR_FAIL_COND_V(size.x <= 0, Interval());
+	ERR_FAIL_COND_V(size.y <= 0, Interval());
+	ERR_FAIL_COND_V(size.z <= 0, Interval());
+	ERR_FAIL_COND_V(dst.size() != size_t(size.x) * size_t(size.y) * size_t(size.z), Interval());
+	const FastNoise::OutputMinMax range =
+			_generator->GenUniformGrid3D(dst.data(), origin.x, origin.y, origin.z, size.x, size.y, size.z, 1.f, _seed);
+	return Interval{ range.min, range.max };
 }
 
-void FastNoise2::get_noise_2d_grid_tileable(godot::Vector2i size, Span<float> dst) const {
-	ERR_FAIL_COND(!is_valid());
-	ERR_FAIL_COND(size.x < 0 || size.y < 0);
-	ERR_FAIL_COND(dst.size() != size_t(size.x) * size_t(size.y));
-	_generator->GenTileable2D(dst.data(), size.x, size.y, 1.f, _seed);
+Interval FastNoise2::get_noise_2d_grid_tileable(godot::Vector2i size, Span<float> dst) const {
+	ERR_FAIL_COND_V(!is_valid(), Interval());
+	ERR_FAIL_COND_V(size.x < 0 || size.y < 0, Interval());
+	ERR_FAIL_COND_V(dst.size() != size_t(size.x) * size_t(size.y), Interval());
+	const FastNoise::OutputMinMax range = _generator->GenTileable2D(dst.data(), size.x, size.y, 1.f, _seed);
+	return Interval{ range.min, range.max };
 }
 
 void FastNoise2::update_generator() {
@@ -540,25 +544,20 @@ godot::String FastNoise2::_b_get_simd_level_name(SIMDLevel level) {
 	return get_simd_level_name(level);
 }
 
-float get_sum(Span<const float> values) {
-	float sum = 0.f;
-	for (const float v : values) {
-		sum += v;
-	}
-	return sum;
-}
-
-void normalize(Span<float> values) {
-	const float sum = get_sum(values);
-	if (sum > 0.0001f) {
-		const float inv_sum = 1.f / sum;
+void normalize(Span<float> values, const Interval range) {
+	if (std::abs(range.max - range.min) < 0.00001f) {
 		for (float &v : values) {
-			v *= inv_sum;
+			v = std::clamp(v, 0.f, 1.f);
+		}
+	} else {
+		const float k = 1.f / (range.max - range.min);
+		for (float &v : values) {
+			v = std::clamp((v - range.min) * k, 0.f, 1.f);
 		}
 	}
 }
 
-godot::PackedByteArray f32_snorm_to_u8_packed_byte_array(Span<const float> src) {
+godot::PackedByteArray convert_f32_snorm_to_u8_packed_byte_array(Span<const float> src) {
 	godot::PackedByteArray bytes;
 	bytes.resize(src.size());
 	Span<uint8_t> bytes_s(bytes.ptrw(), bytes.size());
@@ -569,6 +568,140 @@ godot::PackedByteArray f32_snorm_to_u8_packed_byte_array(Span<const float> src) 
 	return bytes;
 }
 
+godot::PackedByteArray reinterpret_f32_to_packed_byte_array(Span<const float> src) {
+	godot::PackedByteArray bytes;
+	bytes.resize(src.size() * sizeof(float));
+	memcpy(bytes.ptrw(), src.data(), src.size() * sizeof(float));
+	return bytes;
+}
+
+godot::Ref<godot::Image> FastNoise2::get_image_with_options_internal(
+		const godot::Vector2i p_size,
+		const ImageOptions p_options
+) const {
+	ERR_FAIL_COND_V(p_size.x < 0, godot::Ref<godot::Image>());
+	ERR_FAIL_COND_V(p_size.y < 0, godot::Ref<godot::Image>());
+
+	godot::PackedByteArray buffer_f32_as_u8_pba;
+	buffer_f32_as_u8_pba.resize(p_size.x * p_size.y * sizeof(float));
+	Span<uint8_t> buffer_f32_as_u8(buffer_f32_as_u8_pba.ptrw(), buffer_f32_as_u8_pba.size());
+	Span<float> buffer_f32 = buffer_f32_as_u8.reinterpret_cast_to<float>();
+
+	Interval range;
+
+	if (p_options.in_3d_space) {
+		if (p_options.seamless) {
+			ERR_PRINT("3D seamless noise is not supported");
+			return godot::Ref<godot::Image>();
+		} else {
+			range = get_noise_3d_grid(godot::Vector3(), godot::Vector3i(p_size.x, p_size.y, 1), buffer_f32);
+		}
+	} else {
+		if (p_options.seamless) {
+			range = get_noise_2d_grid_tileable(p_size, buffer_f32);
+		} else {
+			range = get_noise_2d_grid(godot::Vector2(), p_size, buffer_f32);
+		}
+	}
+
+	if (p_options.invert) {
+		for (float &v : buffer_f32) {
+			v = -v;
+		}
+	}
+
+	if (p_options.normalize) {
+		normalize(buffer_f32, range);
+	}
+
+	godot::Ref<godot::Image> image;
+
+	switch (p_options.format) {
+		case godot::Image::FORMAT_RF:
+			image = godot::Image::create_from_data(p_size.x, p_size.y, false, p_options.format, buffer_f32_as_u8_pba);
+			break;
+
+		case godot::Image::FORMAT_R8:
+		case godot::Image::FORMAT_L8: {
+			const godot::PackedByteArray buffer_u8_pba = convert_f32_snorm_to_u8_packed_byte_array(buffer_f32);
+			image = godot::Image::create_from_data(p_size.x, p_size.y, false, p_options.format, buffer_u8_pba);
+		} break;
+
+		default:
+			ERR_PRINT("Format not supported");
+			break;
+	}
+
+	return image;
+}
+
+godot::TypedArray<godot::Image> FastNoise2::get_image_3d_with_options_internal(
+		const godot::Vector3i p_size,
+		const ImageOptions p_options
+) const {
+	ERR_FAIL_COND_V(p_size.x < 0, godot::Ref<godot::Image>());
+	ERR_FAIL_COND_V(p_size.y < 0, godot::Ref<godot::Image>());
+	ERR_FAIL_COND_V(p_size.z < 0, godot::Ref<godot::Image>());
+
+	godot::PackedByteArray buffer_f32_as_u8_pba;
+	buffer_f32_as_u8_pba.resize(p_size.x * p_size.y * p_size.z * sizeof(float));
+	Span<uint8_t> buffer_f32_as_u8(buffer_f32_as_u8_pba.ptrw(), buffer_f32_as_u8_pba.size());
+	Span<float> buffer_f32 = buffer_f32_as_u8.reinterpret_cast_to<float>();
+
+	Interval range;
+
+	if (p_options.seamless) {
+		ERR_PRINT("3D seamless noise is not supported");
+		return godot::Ref<godot::Image>();
+	} else {
+		range = get_noise_3d_grid(godot::Vector3(), p_size, buffer_f32);
+	}
+
+	if (p_options.invert) {
+		for (float &v : buffer_f32) {
+			v = -v;
+		}
+	}
+
+	if (p_options.normalize) {
+		normalize(buffer_f32, range);
+	}
+
+	godot::TypedArray<godot::Image> images;
+	images.resize(p_size.z);
+
+	const unsigned int deck_size = p_size.x * p_size.y;
+
+	switch (p_options.format) {
+		case godot::Image::FORMAT_RF:
+			for (int z = 0; z < p_size.z; ++z) {
+				const Span<const float> deck = buffer_f32.sub(z * deck_size, deck_size);
+				const godot::PackedByteArray image_bytes = reinterpret_f32_to_packed_byte_array(deck);
+				const godot::Ref<godot::Image> image =
+						godot::Image::create_from_data(p_size.x, p_size.y, false, p_options.format, image_bytes);
+				images[z] = image;
+			}
+			break;
+
+		case godot::Image::FORMAT_R8:
+		case godot::Image::FORMAT_L8: {
+			for (int z = 0; z < p_size.z; ++z) {
+				const Span<const float> deck = buffer_f32.sub(z * deck_size, deck_size);
+				const godot::PackedByteArray image_bytes = convert_f32_snorm_to_u8_packed_byte_array(deck);
+				const godot::Ref<godot::Image> image =
+						godot::Image::create_from_data(p_size.x, p_size.y, false, p_options.format, image_bytes);
+				images[z] = image;
+			}
+		} break;
+
+		default:
+			ERR_PRINT("Format not supported");
+			break;
+	}
+
+	return images;
+}
+
 godot::Ref<godot::Image> FastNoise2::get_image(
 		int p_width,
 		int p_height,
@@ -576,36 +709,13 @@ godot::Ref<godot::Image> FastNoise2::get_image(
 		bool p_in_3d_space,
 		bool p_normalize
 ) const {
-	ERR_FAIL_COND_V(p_width < 0, godot::Ref<godot::Image>());
-	ERR_FAIL_COND_V(p_height < 0, godot::Ref<godot::Image>());
-
-	godot::PackedFloat32Array noise_buffer;
-	noise_buffer.resize(p_width * p_height);
-
-	Span<float> noise_buffer_s(noise_buffer.ptrw(), noise_buffer.size());
-
-	if (p_in_3d_space) {
-		get_noise_3d_grid(godot::Vector3(), godot::Vector3i(p_width, p_height, 1), noise_buffer_s);
-	} else {
-		get_noise_2d_grid(godot::Vector2(), godot::Vector2i(p_width, p_height), noise_buffer_s);
-	}
-
-	if (p_invert) {
-		for (float &v : noise_buffer) {
-			v = 1.f - v;
-		}
-	}
-
-	if (p_normalize) {
-		normalize(noise_buffer_s);
-	}
-
-	const godot::PackedByteArray image_bytes = f32_snorm_to_u8_packed_byte_array(noise_buffer_s);
-
-	const godot::Ref<godot::Image> image =
-			godot::Image::create_from_data(p_width, p_height, false, godot::Image::FORMAT_L8, image_bytes);
-
-	return image;
+	ImageOptions options;
+	options.invert = p_invert;
+	options.in_3d_space = p_in_3d_space;
+	options.normalize = p_normalize;
+	// To match Godot expectations
+	options.format = godot::Image::FORMAT_L8;
+	return get_image_with_options_internal(godot::Vector2i(p_width, p_height), options);
 }
 
 godot::TypedArray<godot::Image> FastNoise2::get_image_3d(
@@ -615,40 +725,12 @@ godot::TypedArray<godot::Image> FastNoise2::get_image_3d(
 		bool p_invert,
 		bool p_normalize
 ) const {
-	ERR_FAIL_COND_V(p_width < 0, godot::TypedArray<godot::Image>());
-	ERR_FAIL_COND_V(p_height < 0, godot::TypedArray<godot::Image>());
-	ERR_FAIL_COND_V(p_depth < 0, godot::TypedArray<godot::Image>());
-
-	godot::PackedFloat32Array noise_buffer;
-	noise_buffer.resize(p_width * p_height * p_depth);
-	Span<float> noise_buffer_s(noise_buffer.ptrw(), noise_buffer.size());
-
-	get_noise_3d_grid(godot::Vector3(), godot::Vector3i(p_width, p_height, p_depth), noise_buffer_s);
-
-	if (p_invert) {
-		for (float &v : noise_buffer) {
-			v = 1.f - v;
-		}
-	}
-
-	if (p_normalize) {
-		normalize(noise_buffer_s);
-	}
-
-	godot::TypedArray<godot::Image> images;
-	images.resize(p_height);
-
-	const unsigned int deck_size = p_width * p_height;
-
-	for (int z = 0; z < p_depth; ++z) {
-		const Span<const float> deck = noise_buffer_s.sub(z * deck_size, deck_size);
-		const godot::PackedByteArray image_bytes = f32_snorm_to_u8_packed_byte_array(deck);
-		const godot::Ref<godot::Image> image =
-				godot::Image::create_from_data(p_width, p_height, false, godot::Image::FORMAT_L8, image_bytes);
-		images[z] = image;
-	}
-
-	return images;
+	ImageOptions options;
+	options.invert = p_invert;
+	options.normalize = p_normalize;
+	// To match Godot expectations
+	options.format = godot::Image::FORMAT_L8;
+	return get_image_3d_with_options_internal(godot::Vector3i(p_width, p_height, p_depth), options);
 }
 
 godot::Ref<godot::Image> FastNoise2::get_seamless_image(
@@ -659,35 +741,15 @@ godot::Ref<godot::Image> FastNoise2::get_seamless_image(
 		real_t p_blend_skirt,
 		bool p_normalize
 ) const {
-	ERR_FAIL_COND_V(p_width < 0, godot::Ref<godot::Image>());
-	ERR_FAIL_COND_V(p_height < 0, godot::Ref<godot::Image>());
-
-	godot::PackedFloat32Array noise_buffer;
-	noise_buffer.resize(p_width * p_height);
-	Span<float> noise_buffer_s(noise_buffer.ptrw(), noise_buffer.size());
-
-	if (p_in_3d_space) {
-		ERR_PRINT("Not supported");
-	} else {
-		get_noise_2d_grid_tileable(godot::Vector2i(p_width, p_height), noise_buffer_s);
-	}
-
-	if (p_invert) {
-		for (float &v : noise_buffer) {
-			v = 1.f - v;
-		}
-	}
-
-	if (p_normalize) {
-		normalize(noise_buffer_s);
-	}
-
-	const godot::PackedByteArray image_bytes = f32_snorm_to_u8_packed_byte_array(noise_buffer_s);
-
-	const godot::Ref<godot::Image> image =
-			godot::Image::create_from_data(p_width, p_height, false, godot::Image::FORMAT_L8, image_bytes);
-
-	return image;
+	ImageOptions options;
+	options.invert = p_invert;
+	options.in_3d_space = p_in_3d_space;
+	options.normalize = p_normalize;
+	options.seamless = true;
+	// To match Godot expectations
+	options.format = godot::Image::FORMAT_L8;
+	// Blend skirt is not used, it is not necessary.
+	return get_image_with_options_internal(godot::Vector2i(p_width, p_height), options);
 }
 
 void FastNoise2::_bind_methods() {
