@@ -48,7 +48,7 @@ jobs:
         run: |
           curl -LO https://github.com/Auburn/FastNoise2/releases/download/v0.10.0-alpha/FastNoise2-v0.10.0-alpha-Linux64-GCC.zip
           unzip FastNoise2-v0.10.0-alpha-Linux64-GCC.zip -d FastNoise2_linux
-          cp FastNoise2_linux/FastNoise/bin/FastNoise.so project/addons/zylann.fastoise2/bin
+          cp FastNoise2_linux/FastNoise/lib/FastNoise.so project/addons/zylann.fastoise2/bin
 
       - name: "Get FastNoise2 for Windows"
         run: |
