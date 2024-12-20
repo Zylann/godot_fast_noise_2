@@ -14,6 +14,8 @@ How to install
 ----------------
 
 TODO Provide releases on Github
+TODO Figure out what to do for Linux ARM64, the release of FastNoise2 only contains x86. 
+TODO Figure out what to do for MacOS, we try to compile the extension as universal, but the release of FastNoise2 only has one .dylib for x86 (I am unable to test this, I have no Mac)
 
 Download one of the releases, and unpack it under your `addons` folder (as `addons/zylann.fastnoise2/`). You might have to restart the editor.
 
