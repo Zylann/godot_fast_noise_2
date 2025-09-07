@@ -29,7 +29,7 @@ jobs:
   # build-fn2-linux-arm64:
   #   # Because the prebuilt release doesn't have it
   #   name: Build FastNoise2 for Linux ARM64
-  #   runs-on: ubuntu-20.04
+  #   runs-on: "ubuntu-22.04"
 
   #   steps:
   #     - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
 
   build:
     name: ${{matrix.name}}
-    runs-on: ubuntu-20.04
+    runs-on: "ubuntu-22.04"
 
     strategy:
       matrix:
